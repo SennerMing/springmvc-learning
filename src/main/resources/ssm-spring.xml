@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/mvc https://www.springframework.org/schema/mvc/spring-mvc.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <!-- Spring配置文件，管理Service，DAO，工具类对象-->
+
+    <!-- 声明数据源 -->
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+
+    <!--
+        声明数据源，Druid连接池
+     -->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
+          init-method="init" destroy-method="close">
+        <property name="driverClassName" value="${jdbc.driverClass}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.userName}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+
+    <!-- sqlSessionFactoryBean 帮我们创建sqlSession并且加载mapper.xml文件 -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+<!--        <property name="configLocation" value="classpath:ssm-mybatis.xml"/>-->
+        <property name="mapperLocations" value="classpath:mappers/*Mapper.xml"/>
+        <property name="typeAliasesPackage" value="club.musician.entity"/>
+    </bean>
+
+    <!-- MapperScanConfiguration，指定DAO接口，为我们创建Mapper代理对象 -->
+    <bean id="mapperScannerConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="club.musician.dao"/>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+    </bean>
+
+    <!-- 进行业务逻辑的管理 -->
+    <context:component-scan base-package="club.musician.service"/>
+
+    <!-- 这个DataSourceTransactionManager是Spring框架通过数据源帮我们管理事务 -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <!-- 开启事务注解  @Transactional -->
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+
+</beans>

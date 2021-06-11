@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="club.musician.dao.UserDao">
+
+    <select id="getUser" resultType="club.musician.entity.User">
+        select t.id,t.last_name as userName,t.gender,t.email from tbl_employee t
+        where t.id = #{id}
+    </select>
+
+    <!--
+        根据条件判断进行更新了
+        set可以换成trim<trim suffix="set" suffixOverrides=",">
+     -->
+    <insert id="addUser">
+        insert into tbl_employee(last_name,gender,email)
+        values(#{userName},#{gender},#{email})
+    </insert>
+
+</mapper>

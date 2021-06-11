@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/mvc https://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+
+    <context:component-scan base-package="club.musician"/>
+
+    <!-- 配置视图解析器 -->
+    <!--
+		可以声明SpringMVC框架中的视图解析器，帮助开发人员设置视图文件的路径
+		覆盖里面参数，不需要再给他ID了
+    -->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/views/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <!-- 加入HttpMessageConverter，对应可以使用@ResponseBody注解进行java对象转JSON字符串的处理-->
+    <mvc:annotation-driven></mvc:annotation-driven>
+
+
+    <!--
+        第一种处理静态资源的方式：
+            1.需要在SpringMVC配置文件中加入下面这个标签
+
+            2.原理是：加入这个标签后，框架会创建空气制对象DefaultServletHttpRequestHandler
+            （类似创建我们自己的DefaultServlet,像是一Controller）,这个DefaultServletHttpRequestHandler
+            会把接收到的请求(访问静态资源的)转发给tomcat的DefaultServlet
+
+           这个其实是和上面这个annotation-driven是配套使用的，因为这个default-servlet-handler和
+           @RequestMapping()注解有冲突的
+
+           这个缺点就是，需要使用的服务器有这个DefaultServlet的功能，否则就会失败
+
+     -->
+    <mvc:default-servlet-handler></mvc:default-servlet-handler>
+
+
+    <!--
+        第二种处理静态资源的方式：
+            mvc:resources加入后，框架会创建ResourceHttpRequestHandler这个处理器对象。
+            让这个对象处理静态资源的访问，不依赖tomcat服务器
+
+            mapping:访问静态资源的uri地址，可以使用通配符，既可代表目录也可代表文件
+            location:指定静态资源在我们项目中的目录位置
+
+            image/**：表示image/p1.jpg,image/user/logo.gif,image/order/history/list.png
+
+         这个mvc:resources和这个@RequestMapping是有一定的冲突的，也是需要添加这个annotation-driven
+     -->
+
+<!--    <mvc:resources mapping="/image/**" location="/image/"/>-->
+<!--    <mvc:resources mapping="/html/**" location="/html/"/>-->
+
+    <!--
+        上面这个写法，在实际生产情况下，还是比较费劲的，因为要写好多个啊，在实际生产情况下
+         我们都在webapp下面新建一个static文件夹，所有静态资源的访问全都是以/static/开头的
+     -->
+    <mvc:resources mapping="/static/**" location="/static/"/>
+
+</beans>
